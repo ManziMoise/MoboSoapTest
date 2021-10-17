@@ -23,11 +23,11 @@ import static com.example.mylogin.SOAPRequest.NAMESPACE;
 
 public class AuthenticateAgentActivity extends AppCompatActivity {
 
-    EditText principalType, principal, credentials;
+    EditText EdPrincipalType, EdPrincipal, EdCredentials;
     Button submit;
-    String newPrincipalType;
-    String newPrincipal;
-    String newCredentials;
+    String principalType;
+    String principal;
+    String credentials, checkCredentialsResponse;
 
     SOAPRequest request;
     @Override
@@ -35,9 +35,9 @@ public class AuthenticateAgentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authenticate_agent);
 
-        principal = (EditText)findViewById(R.id.principalEd);
-        principalType=(EditText)findViewById(R.id.principalTypeEd);
-        credentials=(EditText)findViewById(R.id.credentialsEd);
+        EdPrincipal = (EditText)findViewById(R.id.principalEd);
+        EdPrincipalType=(EditText)findViewById(R.id.principalTypeEd);
+        EdCredentials=(EditText)findViewById(R.id.credentialsEd);
         submit = (Button)findViewById(R.id.submitBtn);
 
 
@@ -47,9 +47,9 @@ public class AuthenticateAgentActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-               newPrincipalType = principalType.getText().toString();
-               newPrincipal = principal.getText().toString();
-               newCredentials = credentials.getText().toString();
+                principalType = EdPrincipalType.getText().toString();
+                principal = EdPrincipal.getText().toString();
+                credentials = EdCredentials.getText().toString();
 
 
                 new AuthTask().execute();
@@ -63,17 +63,17 @@ public class AuthenticateAgentActivity extends AppCompatActivity {
     private  class AuthTask extends AsyncTask<Void, Void, String>{
 
          String NAMESPACE = "http://tests.mcash.rw/rwandatest/services/";
-         String METHOD = "checkCredentials";
+         String METHOD = "access";
          String SOAPACTION = "http://tests.mcash.rw/rwandatest/services/access/";
-         String URL = "http://tests.mcash.rw/rwandatest/services/access?wsdl";
+         String URL = "http://tests.mcash.rw/rwandatest/services/access?principalType=newPrincipalType&principal=newPrincipal&credentials=newCredentials";
 
         @Override
         protected String doInBackground(Void... params) {
 
             SoapObject request = new SoapObject(NAMESPACE, METHOD);
-            request.addProperty("principalType", newPrincipalType);
-            request.addProperty("principal", newPrincipal);
-            request.addProperty("credentials", newCredentials);
+            request.addProperty("principalType", principalType);
+            request.addProperty("principal", principal);
+            request.addProperty("credentials", credentials);
 
             SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
             envelope.setOutputSoapObject(request);
@@ -89,7 +89,7 @@ public class AuthenticateAgentActivity extends AppCompatActivity {
 
 
             SoapObject response = (SoapObject) envelope.bodyIn;
-            SoapPrimitive result = (SoapPrimitive) response.getProperty("checkCredentialsResponse");
+            SoapPrimitive result = (SoapPrimitive) response.getProperty(checkCredentialsResponse);
 
             return result.toString();
         }
