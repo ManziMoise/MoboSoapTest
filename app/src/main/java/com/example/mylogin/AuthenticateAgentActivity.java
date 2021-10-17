@@ -7,6 +7,16 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import org.ksoap2.SoapEnvelope;
+import org.ksoap2.serialization.SoapObject;
+import org.ksoap2.serialization.SoapPrimitive;
+import org.ksoap2.serialization.SoapSerializationEnvelope;
+import org.ksoap2.transport.HttpTransportSE;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 
 import static com.example.mylogin.SOAPRequest.METHOD;
 import static com.example.mylogin.SOAPRequest.NAMESPACE;
@@ -15,6 +25,9 @@ public class AuthenticateAgentActivity extends AppCompatActivity {
 
     EditText principalType, principal, credentials;
     Button submit;
+    String newPrincipalType;
+    String newPrincipal;
+    String newCredentials;
 
     SOAPRequest request;
     @Override
@@ -28,13 +41,15 @@ public class AuthenticateAgentActivity extends AppCompatActivity {
         submit = (Button)findViewById(R.id.submitBtn);
 
 
+
+
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                String newPrincipalType = principalType.getText().toString();
-                String newPrincipal = principal.getText().toString();
-                String newCredentials = credentials.getText().toString();
+               newPrincipalType = principalType.getText().toString();
+               newPrincipal = principal.getText().toString();
+               newCredentials = credentials.getText().toString();
 
 
                 new AuthTask().execute();
@@ -45,24 +60,44 @@ public class AuthenticateAgentActivity extends AppCompatActivity {
 
     }
 
-    private  class AuthTask extends AsyncTask<Void, Void, Boolean>{
+    private  class AuthTask extends AsyncTask<Void, Void, String>{
 
-
+         String NAMESPACE = "http://tests.mcash.rw/rwandatest/services/";
+         String METHOD = "checkCredentials";
+         String SOAPACTION = "http://tests.mcash.rw/rwandatest/services/access/";
+         String URL = "http://tests.mcash.rw/rwandatest/services/access?wsdl";
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected String doInBackground(Void... params) {
 
-           request = new SOAPRequest(NAMESPACE, METHOD);
+            SoapObject request = new SoapObject(NAMESPACE, METHOD);
+            request.addProperty("principalType", newPrincipalType);
+            request.addProperty("principal", newPrincipal);
+            request.addProperty("credentials", newCredentials);
+
+            SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+            envelope.setOutputSoapObject(request);
+
+            HttpTransportSE transportSE = new HttpTransportSE(URL);
+            try {
+                transportSE.call(SOAPACTION, envelope);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (XmlPullParserException e) {
+                e.printStackTrace();
+            }
 
 
+            SoapObject response = (SoapObject) envelope.bodyIn;
+            SoapPrimitive result = (SoapPrimitive) response.getProperty("checkCredentialsResponse");
 
-
-            return null;
+            return result.toString();
         }
 
         @Override
-        protected void onPostExecute(Boolean aBoolean) {
+        protected void onPostExecute(String aBoolean) {
             super.onPostExecute(aBoolean);
+            Toast.makeText(AuthenticateAgentActivity.this, "The Result is: "+aBoolean+"", Toast.LENGTH_SHORT).show();
 
         }
     }
