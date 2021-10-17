@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         validcd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent validIntent = new Intent(MainActivity.this, AuthenticateAgentActivity.class);
+                Intent validIntent = new Intent(MainActivity.this, CustomerValidationActivity.class);
                 startActivity(validIntent);
             }
         });
